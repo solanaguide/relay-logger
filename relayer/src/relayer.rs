@@ -658,15 +658,12 @@ impl RelayerImpl {
                     .iter()
                     .filter(|p| !p.meta().discard())
                     .filter_map(|packet| {
-                            let tx: VersionedTransaction = packet.deserialize_slice(..).ok()?;
-                            let meta = packet.meta();
-                            let ip = meta.addr;
-                            log_tx_and_ip(&tx, &ip);
-                            Some(packet)
-                    })
-                    .filter_map(|packet| {
+                        let tx: VersionedTransaction = packet.deserialize_slice(..).ok()?;
+                        let meta = packet.meta();
+                        let ip = meta.addr;
+                        log_tx_and_ip(&tx, &ip);
                         if !ofac_addresses.is_empty() {
-                            let tx: VersionedTransaction = packet.deserialize_slice(..).ok()?;
+
                             if !is_tx_ofac_related(&tx, ofac_addresses, address_lookup_table_cache)
                             {
                                 Some(packet)
