@@ -18,6 +18,7 @@ use clap::Parser;
 use crossbeam_channel::tick;
 use dashmap::DashMap;
 use env_logger::Env;
+use log4rs;
 use jito_block_engine::block_engine::{BlockEngineConfig, BlockEngineRelayerHandler};
 use jito_core::{
     graceful_panic,
@@ -312,9 +313,13 @@ fn main() {
     const REQUESTS_PER_SECOND: u64 = 5;
 
     // one can override the default log level by setting the env var RUST_LOG
-    env_logger::Builder::from_env(Env::new().default_filter_or("info"))
-        .format_timestamp_millis()
-        .init();
+    // env_logger::Builder::from_env(Env::new().default_filter_or("info"))
+    //     .format_timestamp_millis()
+    //     .init();
+
+    // Initialize log4rs for specific file logging
+    log4rs::init_file("log4rs.yml", Default::default()).unwrap();
+
 
     let args: Args = Args::parse();
     info!("args: {:?}", args);

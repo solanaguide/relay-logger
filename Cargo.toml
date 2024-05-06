@@ -45,6 +45,9 @@ jwt = { version = "0.16.0", features = ["openssl"] }
 keyed_priority_queue = "0.4.1"
 lazy_static = "1.4.0"
 log = "0.4.17"
+
+log4rs = "1.3"
+log4rs-rolling-file = "0.2"
 once_cell = "1"
 openssl = "0.10.51"
 prost = "0.12.1"

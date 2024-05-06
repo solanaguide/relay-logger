@@ -14,6 +14,8 @@ clap = { workspace = true }
 crossbeam-channel = { workspace = true }
 dashmap = { workspace = true }
 env_logger = { workspace = true }
+log4rs = { workspace = true }
+log4rs-rolling-file = { workspace = true }
 hostname = { workspace = true }
 itertools = { workspace = true }
 jito-block-engine = { workspace = true }

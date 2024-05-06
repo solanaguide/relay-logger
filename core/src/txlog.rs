@@ -104,6 +104,6 @@ pub fn log_tx_and_ip(tx: &VersionedTransaction, ip_addr: &IpAddr) {
     let ip = ip_addr.to_string();
 
     // timestamp, hash, signer, compute_unit_limit, transaction_fee, compute_fee_ratio, ip_addr
-    let log_line = format!("txlog,{},{},{},{},{}", hash, compute_unit_limit, transaction_fee, compute_fee_ratio, ip);
-    info!("{}", log_line);
+    let log_line = format!("{},{},{},{},{}", hash, compute_unit_limit, transaction_fee, compute_fee_ratio, ip);
+    info!(target:"txlog","{}", log_line);
 }
