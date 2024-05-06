@@ -12,6 +12,7 @@ publish = false
 bincode = { workspace = true }
 crossbeam-channel = { workspace = true }
 dashmap = { workspace = true }
+file-rotate = { workspace = true }
 jito-rpc = { workspace = true }
 lazy_static = { workspace = true }
 log = { workspace = true }
