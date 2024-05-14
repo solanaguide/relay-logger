@@ -40,7 +40,7 @@ Log behaviour can be altered by editing log4rs.yml and restarting your service. 
 
 # What to do with the data?
 
-It's up to you - more experimentation on this would be great. My current setup (tho I change every couple of days) is:
+It's up to you - more experimentation on this would be great. Personally, I feel we should be optimizing not just for high rewards but also the highest number of non-vote transactions per block, to ensure we are landing as many transactions as possible for users. My current setup (tho I change every couple of days) is:
 
 Every minute, run a cron job to:
 1. Parse each log file in ./txlogs
