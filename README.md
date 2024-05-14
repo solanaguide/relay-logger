@@ -53,11 +53,12 @@ Then, on ElasticSearch I've built dashboards that show me reports such as
 - IPs per signature (not doing anything with this yet)
 - 'Big Spender' IPs I want to ensure I allow in before any filters
 
-I'm then building two lists:
+At the moment I'm  building two lists:
 - The worst behaviour - mostly high reqests, tiny fee_ratios, but also 1 or 2 IPs that are just excessively high TX counts
 - The best behaved IPs - people I want to ensure don't get lost by any other filter issues such as rate limiting etc
 - (at one point) Bad C-Class - however this included a lot of gossip IPs, and after implementing I saw a marked decrease in the number of non vote transactions I was processing
 
+These are then paired with the tpu-traffic-classifier rulesets, so that I allow staked connections and 'best behaved' IPs, then block bad behaviour before allowing in both gossip and non-gossip IPs with a tight per-IP RPS limit.
 
 Separately, I am also using a websocket connection to listen to blocks as they are created + update my ElasticSearch index to mark signatures as 'landed' when they are packed into a block. The data is a little unreliable so I'm not yet doing anything with this yet.
 
@@ -66,6 +67,7 @@ I'm currently creating ipsets manually from this data, however once I am happy w
 - Query it from my server, and apply any additional filtering (eg Top IPs => Top IPs where fee_ratio < ....)
 - Create/update ipset
 
+I'm still not sure the best way to maintain lists of blocked IPs over time, and when a ban could expire. I'm considering simply disabling all ipset rules for a random minute or two each hour. Would love to discuss ideas
 
 # What does it look like?
 
