@@ -1,8 +1,8 @@
-use log::{debug, info};
+use log::{ info };
 use solana_sdk::{
     transaction::VersionedTransaction,
     pubkey::Pubkey,
-    message::{self, VersionedMessage, Message as LegacyMessage},
+    message::{VersionedMessage, Message as LegacyMessage},
     instruction::CompiledInstruction,
     message::v0,
 };
@@ -11,14 +11,12 @@ use std::net::IpAddr;
 
 const LAMPORTS_PER_SIGNATURE: u64 = 5000;
 const COMPUTE_BUDGET_PROGRAM_ID: Pubkey = solana_sdk::compute_budget::id();
-const VOTE_PROGRAM_ID: Pubkey = solana_sdk::vote::program::id();  // Assuming the ID is imported correctly
 
 
 trait MessageTrait {
     fn account_keys(&self) -> &[Pubkey];
     fn instructions(&self) -> &[CompiledInstruction];
     fn num_required_signatures(&self) -> u8;
-    fn is_signer(&self, index: usize) -> bool;
 }
 
 impl MessageTrait for LegacyMessage {
@@ -34,9 +32,6 @@ impl MessageTrait for LegacyMessage {
         self.header.num_required_signatures
     }
 
-    fn is_signer(&self, index: usize) -> bool {
-        self.is_signer(index)
-    }
 }
 
 impl MessageTrait for v0::Message {
@@ -52,9 +47,7 @@ impl MessageTrait for v0::Message {
         self.header.num_required_signatures
     }
 
-    fn is_signer(&self, index: usize) -> bool {
-        self.is_signer(index)
-    }
+
 }
 
 pub fn log_tx_and_ip(tx: &VersionedTransaction, ip_addr: &IpAddr) {

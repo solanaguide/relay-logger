@@ -38,7 +38,6 @@ timestamp,signature,compute_unit_limit,transaction_fee,compute_fee_ratio,ip_addr
 
 Logs should be rotated when >1gb. This may happen fast if you allow all traffic; ensure you are monitoring your HDD space and prune is working correctly.
 
- 
 
 
 # Building
