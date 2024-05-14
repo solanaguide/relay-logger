@@ -1,5 +1,5 @@
 # Logging Fork Of Jito Relayer
-Jito Relayer acts as a transaction processing unit (TPU) proxy for Solana validators. This fork has been modified to log all tx received by the relayer to a rolling set of CSV files, allowing futher analysis.
+Relay Logger acts as a transaction processing unit (TPU) proxy for Solana validators. This fork has been modified to log all tx received by the relayer to a rolling set of CSV files, allowing futher analysis.
 
 Assuming your relayer is already processing all transactions, and your TPU ports are closed, you can use this relayer as a drop in replacement for Jito's in order to log locally, without needing any additional patches or modifications to your validator source.
 
@@ -23,7 +23,6 @@ These are then used to calculate a fee ratio, which is roughly `total_fee/total_
 This is handled by the following code in `core/src/txlog.rs`
 
 ```rust
-// let compute_unit_price = compute_unit_price / 1_000_000u64;
     let priority_fee = (compute_unit_limit as u64 * compute_unit_price) / 1_000_000u64;
     let transaction_fee = priority_fee + (num_signatures * LAMPORTS_PER_SIGNATURE);
     let compute_fee_ratio = transaction_fee as f64 / (1f64 + compute_unit_limit as f64);
@@ -36,9 +35,52 @@ By default, logs will be stored under ./txlogs/txlog.csv in the following format
 timestamp,signature,compute_unit_limit,transaction_fee,compute_fee_ratio,ip_address
 ```
 
-Logs should be rotated when >1gb. This may happen fast if you allow all traffic; ensure you are monitoring your HDD space and prune is working correctly.
+Log behaviour can be altered by editing log4rs.yml and restarting your service. By default it stores up to 1GB per log file and retains up to 10 logs. On my setup I am currently storing 50MB per file and up to 200 files, this allows me to post my logs to ElasticSearch each minute using Cron, so my db is as up to date as possible whilst not touching the live txlog.csv file that is still being written.
 
 
+# What to do with the data?
+
+It's up to you - more experimentation on this would be great. My current setup (tho I change every couple of days) is:
+
+Every minute, run a cron job to:
+1. Parse each log file in ./txlogs
+2. Post the data to an ElasticSearch Cloud instance
+
+Then, on ElasticSearch I've built dashboards that show me reports such as
+- Potential Fees Per Minute vs Avg Fee ratio - good to see how spiky demand can be
+- Top IPs By Request - and their median fee ratio, to compare good vs spammy low fee only IPs
+- Amount of duplication per IP / C-Class IP
+- IPs per signature (not doing anything with this yet)
+- 'Big Spender' IPs I want to ensure I allow in before any filters
+
+I'm then building two lists:
+- The worst behaviour - mostly high reqests, tiny fee_ratios, but also 1 or 2 IPs that are just excessively high TX counts
+- The best behaved IPs - people I want to ensure don't get lost by any other filter issues such as rate limiting etc
+- (at one point) Bad C-Class - however this included a lot of gossip IPs, and after implementing I saw a marked decrease in the number of non vote transactions I was processing
+
+
+Separately, I am also using a websocket connection to listen to blocks as they are created + update my ElasticSearch index to mark signatures as 'landed' when they are packed into a block. The data is a little unreliable so I'm not yet doing anything with this yet.
+
+I'm currently creating ipsets manually from this data, however once I am happy with the filters I'm using I plan to automate the generation of IP sets:
+- Build a query in ElasticSearch/Kibana
+- Query it from my server, and apply any additional filtering (eg Top IPs => Top IPs where fee_ratio < ....)
+- Create/update ipset
+
+
+# What does it look like?
+
+I've setup a Kibana dashboard that shows live connections to my node. Note this is *post* firewall so many of the IPs I've deemed bad will not be appearing, but hopefully its helpful to see the kinds of queries I'm looking at
+
+https://my-deployment-57a9de.kb.europe-west3.gcp.cloud.es.io:9243/s/public-space/app/dashboards#/view/ca870b11-c3e2-4179-a779-269b57ddd49e?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-1h%2Cto%3Anow))
+
+I can't make it public, so you can log in using:
+
+Elasticsearch User: demo
+Password: solana
+
+Note too that it is a pain to update due to weird Kibana permissions, so over time it may not have everything i'm considering when analyzing traffic, but hopefully there's enough there to stimulate some ideas + discussion
+
+Also in most reports I use Median not Mean for averages; this is very slow so the dashboard uses Mean instead.
 
 # Building
 ```shell
