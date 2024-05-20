@@ -1,0 +1,33 @@
+appenders:
+  stdout:
+    kind: console
+    encoder:
+      pattern: "{d(%s%3f)} - {l} - {m}{n}"
+
+  file:
+    kind: rolling_file
+    path: "txlogs/txlog.csv"
+    encoder:
+      pattern: "{d(%s%3f)},{m}{n}"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 1gb
+      roller:
+        kind: fixed_window
+        pattern: "txlogs/txlog.{}.csv"
+        base: 1
+        count: 10
+
+root:
+  level: info
+  appenders:
+    - stdout
+
+loggers:
+  txlog:
+    level: info
+    appenders:
+      - file
+    additive: false
